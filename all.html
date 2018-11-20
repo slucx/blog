@@ -105,6 +105,207 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15427038173082.html">
+                
+                  <h1>Linux下动态库函数的hook</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">相关函数</h2>
+
+<pre><code class="language-c">#include &lt;dlfcn.h&gt;
+
+void *dlsym(void *handle, const char *symbol);
+
+#define _GNU_SOURCE
+#include &lt;dlfcn.h&gt;
+
+void *dlvsym(void *handle, char *symbol, char *version);
+
+// Link with -ldl.
+</code></pre>
+
+<p>dlsym返回一个函数地址，其中handle是dlopen返回的动态库handle，symbol为函数名。<br/>
+其中如果handle为RTLD_NEXT的话，会返回后面第一次出现这个函数名的地址。<br/>
+因此dlsym使用RTLD_NEXT参数后返回的地址与库的加载顺序相关。</p>
+
+<h2 id="toc_1">测试例子</h2>
+
+<pre><code class="language-c">// first_one.c
+// 编译：gcc -shared -fPIC -o libfirst_one.so first_one.c
+#include &lt;stdio.h&gt;
+
+void print_message() {
+    printf(&quot;the first lib~~\n&quot;);
+}
+
+void first() {
+    printf(&quot;init first\n&quot;);
+}
+
+// second_one.c
+// 编译：gcc -shared -fPIC -o libsecond_one.so second_one.c
+#include &lt;stdio.h&gt;
+
+void print_message() {
+    printf(&quot;the second lib~~\n&quot;);
+}
+
+void second() {
+    printf(&quot;init second\n&quot;);
+}
+
+// wrap.c
+// 编译：gcc -shared -fPIC -o libwrap.so wrap.c
+#define _GNU_SOURCE
+
+#include &lt;stdio.h&gt;
+#include &lt;dlfcn.h&gt;
+#include &lt;errno.h&gt;
+
+typedef void (*func)();
+
+static func f;
+
+void load_func() __attribute__((constructor));
+void load_func() {
+    f = (func)dlsym(RTLD_NEXT, &quot;print_message&quot;);
+    char *error_str = dlerror();
+    if (error_str != NULL) {
+        printf(&quot;%s\n&quot;, error_str);
+    }
+    printf(&quot;load func first f=%p\n&quot;, f);
+}
+
+void print_message() {
+    printf(&quot;the wrap lib~~\n&quot;);
+    f();
+}
+
+// main.c
+// 编译：gcc -c main.c
+void print_message();
+void first();
+void second();
+
+int main(void) {
+    first();
+    second();
+    print_message();
+
+    return 0;
+}
+
+// 生成first: gcc -o first main.o -lwrap -lfirst_one -lsecond_one -ldl -L.
+// 生成second: gcc -o second main.o -lwrap -lsecond_one -lfirst_one -ldl -L.
+
+/* 运行结果
+./first                                                                                                                            
+load func first f=0x7f2d0ace76c0
+init first
+init second
+the wrap lib~~
+the first lib~~
+*/
+
+/* 运行结果
+./second                                                                                                                           
+load func first f=0x7f78d6e616c0
+init first
+init second
+the wrap lib~~
+the second lib~~
+*/
+
+/* 使用ldd查看动态库加载顺序
+ldd first                                                                                                                           linux-vdso.so.1 =&gt;  (0x00007fff871d2000)
+    libwrap.so =&gt; ./libwrap.so (0x00007f7fff87e000)
+    libfirst_one.so =&gt; ./libfirst_one.so (0x00007f7fff67c000)
+    libsecond_one.so =&gt; ./libsecond_one.so (0x00007f7fff47a000)
+    libdl.so.2 =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f7fff276000)
+    libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f7ffeeac000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f7fffa80000)
+*/
+
+/* 使用ldd查看动态库加载顺序
+ldd second                                                                                                           
+    linux-vdso.so.1 =&gt;  (0x00007ffd9b5b8000)
+    libwrap.so =&gt; ./libwrap.so (0x00007efd7f764000)
+    libsecond_one.so =&gt; ./libsecond_one.so (0x00007efd7f562000)
+    libfirst_one.so =&gt; ./libfirst_one.so (0x00007efd7f360000)
+    libdl.so.2 =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007efd7f15c000)
+    libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007efd7ed92000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007efd7f966000)
+*/
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/11/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Programming.html'>Programming</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15265662090081.html">
+                
+                  <h1>Debian on my x230</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ol>
+<li>install base system</li>
+<li>update and install aptitude</li>
+<li>aptitude install awesome lightdm rxvt-unicode emacs tmux</li>
+<li>aptitude install sudo zsh git build-essential</li>
+<li>install oh-my-zsh</li>
+<li>aptitude install feh gpicview thunar tango-icon-theme</li>
+<li>aptitude install firmware-iwlwifi; modprobe -r iwlwifi; modprobe iwlwifi</li>
+<li>aptitude install automake autoconf cmake</li>
+</ol>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/5/17</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Unix.html'>Unix</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15109047754746.html">
                 
                   <h1>Mac OSX中使用wireshark抓包遇到的权限问题</h1>
@@ -251,112 +452,6 @@ I&#39;m destructor, will run after main function exit.
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15090804393896.html">
-                
-                  <h1>Mac GDB (Unable to find Mach task port for process-id 1262: (os/kern) failure (0x5).) 问题</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ol>
-<li><p>使用/Applications/Utilities/Keychain Access.app创建证书</p>
-
-<p>钥匙串访问-&gt;证书助理-&gt;创建证书<br/>
-给证书随笔取一个名字，身份类型“自签名根证书”，证书类型“代码签名”，勾选“让我覆盖...”。<br/>
-一路确定，到“指定用于该证书的位置”，选择“系统”。创建，然后就成功了。</p></li>
-<li><p>设置改证书为“始终信任”</p>
-
-<p>选择“系统”、“我的证书”，找到刚刚的证书，选择“始终信任”。<br/>
-重启系统。gdb就可以正常调试其它应用程序了。</p></li>
-<li><p>使用改证书对gdb签名</p>
-
-<pre><code class="language-shell">codesign -s [证书的名字] ［gdb的完整路径名］ 
-</code></pre></li>
-</ol>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Unix.html'>Unix</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15075637008733.html">
-                
-                  <h1>C中的默认参数与命名参数</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>这里利用了C的特性，将C结构体参数转换为不定参数，在GCC扩展下也可以实现命名参数，代码如下</p>
-
-<pre><code class="language-C">#include &lt;stdio.h&gt;
-
-#define func(...) myfunc((struct mystru){__VA_ARGS__})
-
-struct mystru {
-    const char *name;
-    int age;
-};
-
-void
-myfunc(struct mystru ms) {
-    printf(&quot;%s:%d\n&quot;, ms.name ?: &quot;untitled&quot;, ms.age);
-}
-
-int
-main(void) {
-    func(&quot;three&quot;, 3);
-    func(&quot;hello&quot;);
-    func(.name = &quot;zero&quot;);
-    func(.age = 20, .name = &quot;slucx&quot;);
-    func(.age = 20);
-
-    return 0;
-}
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Programming.html'>Programming</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -432,6 +527,18 @@ main(void) {
 	      
 		      
 			      <li class="post">
+			        <a href="15427038173082.html">Linux下动态库函数的hook</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15265662090081.html">Debian on my x230</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15109047754746.html">Mac OSX中使用wireshark抓包遇到的权限问题</a>
 			      </li>
 		     
@@ -449,16 +556,8 @@ main(void) {
 		     
 		  
 		      
-			      <li class="post">
-			        <a href="15090804393896.html">Mac GDB (Unable to find Mach task port for process-id 1262: (os/kern) failure (0x5).) 问题</a>
-			      </li>
-		     
 		  
 		      
-			      <li class="post">
-			        <a href="15075637008733.html">C中的默认参数与命名参数</a>
-			      </li>
-		     
 		  
 		      
 		  

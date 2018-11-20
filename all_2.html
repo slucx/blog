@@ -105,6 +105,105 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15075635812636.html">
+                
+                  <h1>判断正在使用gcc还是g++</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main() {
+    printf(&quot;I was compiled as %s!\n&quot;, sizeof(&#39;a&#39;) == 1 ? &quot;C++&quot; : &quot;C&quot;);
+    return 0;
+}
+</code></pre>
+
+<p>以上代码用来区分你正在使用gcc还是g++在编译自己的代码。<br/>
+以上代码基于一个事实：&#39;a&#39;在C中被当作int，而在C++中占1个字节。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Programming.html'>Programming</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15075635270720.html">
+                
+                  <h1>开启Linux的路由转发功能</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">使其他机器可以使用Linux作为路由转发实现共享上网</h2>
+
+<p>以下步骤：</p>
+
+<ol>
+<li>其他机器和物理机在同一网段，比如有线</li>
+<li>在其他机器上配置一个到本物理机的静态路由</li>
+</ol>
+
+<pre><code class="language-shell">    ip ro add default via 192.168.1.11 dev p1p1
+</code></pre>
+
+<ol>
+<li>开启本物理机的ip转发功能</li>
+</ol>
+
+<pre><code class="language-shell">    sudo sysctl -w net.ipv4.ip_forward=1
+</code></pre>
+
+<ol>
+<li> 开启本物理机的SNAT</li>
+</ol>
+
+<pre><code class="language-shell">    sudo iptables -t nat -A POSTROUTING -s 192.168.1.0/24 -o wlp3s0 -j MASQUERADE
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Network.html'>Network</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15075630803845.html">
                 
                   <h1>ssh 登录CentOS慢的解决方案</h1>
@@ -244,98 +343,6 @@ Command to use:</p>
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15075630235242.html">
-                
-                  <h1>Add Public SSH Key to Remote Server</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>If you want to setup SSH keys to allow logging in without a password, you can do so with a sigle commang.</p>
-
-<p>The first thing you&#39;ll need to do is make sure you&#39;ve run the keygen command to generate the keys:</p>
-
-<pre><code class="language-shell">ssh-keygen -t rsa
-</code></pre>
-
-<p>Then use this command to push the key to the remote server, modifying it to match your serer name.</p>
-
-<pre><code class="language-shell">cat ~/.ssh/id_rsa.pub | ssh user@hostname &#39;cat &gt;&gt; .ssh/authorized_keys&#39;
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Unix.html'>Unix</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15075630040132.html">
-                
-                  <h1>NetworkManager 接管网卡</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>如果需要让NetWorkManger接管网卡的启动和停止，需要如下步骤</p>
-
-<ol>
-<li>配置文件 /etc/network/interfaces 里去掉想要NetworkManger接管的接口</li>
-<li>配置/etc/NetworkManager/NetworkManager.conf</li>
-</ol>
-
-<pre><code class="language-shell">[main]  
-plugins=ifupdown,keyfile
-
-[ifupdown]
-managed=false
-</code></pre>
-
-<ol>
-<li>service network-manager restart</li>
-</ol>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Unix.html'>Unix</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -411,6 +418,18 @@ managed=false
 	      
 		      
 			      <li class="post">
+			        <a href="15427038173082.html">Linux下动态库函数的hook</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15265662090081.html">Debian on my x230</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15109047754746.html">Mac OSX中使用wireshark抓包遇到的权限问题</a>
 			      </li>
 		     
@@ -428,16 +447,8 @@ managed=false
 		     
 		  
 		      
-			      <li class="post">
-			        <a href="15090804393896.html">Mac GDB (Unable to find Mach task port for process-id 1262: (os/kern) failure (0x5).) 问题</a>
-			      </li>
-		     
 		  
 		      
-			      <li class="post">
-			        <a href="15075637008733.html">C中的默认参数与命名参数</a>
-			      </li>
-		     
 		  
 		      
 		  

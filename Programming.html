@@ -105,6 +105,165 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15427038173082.html">
+                
+                  <h1>Linux下动态库函数的hook</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">相关函数</h2>
+
+<pre><code class="language-c">#include &lt;dlfcn.h&gt;
+
+void *dlsym(void *handle, const char *symbol);
+
+#define _GNU_SOURCE
+#include &lt;dlfcn.h&gt;
+
+void *dlvsym(void *handle, char *symbol, char *version);
+
+// Link with -ldl.
+</code></pre>
+
+<p>dlsym返回一个函数地址，其中handle是dlopen返回的动态库handle，symbol为函数名。<br/>
+其中如果handle为RTLD_NEXT的话，会返回后面第一次出现这个函数名的地址。<br/>
+因此dlsym使用RTLD_NEXT参数后返回的地址与库的加载顺序相关。</p>
+
+<h2 id="toc_1">测试例子</h2>
+
+<pre><code class="language-c">// first_one.c
+// 编译：gcc -shared -fPIC -o libfirst_one.so first_one.c
+#include &lt;stdio.h&gt;
+
+void print_message() {
+    printf(&quot;the first lib~~\n&quot;);
+}
+
+void first() {
+    printf(&quot;init first\n&quot;);
+}
+
+// second_one.c
+// 编译：gcc -shared -fPIC -o libsecond_one.so second_one.c
+#include &lt;stdio.h&gt;
+
+void print_message() {
+    printf(&quot;the second lib~~\n&quot;);
+}
+
+void second() {
+    printf(&quot;init second\n&quot;);
+}
+
+// wrap.c
+// 编译：gcc -shared -fPIC -o libwrap.so wrap.c
+#define _GNU_SOURCE
+
+#include &lt;stdio.h&gt;
+#include &lt;dlfcn.h&gt;
+#include &lt;errno.h&gt;
+
+typedef void (*func)();
+
+static func f;
+
+void load_func() __attribute__((constructor));
+void load_func() {
+    f = (func)dlsym(RTLD_NEXT, &quot;print_message&quot;);
+    char *error_str = dlerror();
+    if (error_str != NULL) {
+        printf(&quot;%s\n&quot;, error_str);
+    }
+    printf(&quot;load func first f=%p\n&quot;, f);
+}
+
+void print_message() {
+    printf(&quot;the wrap lib~~\n&quot;);
+    f();
+}
+
+// main.c
+// 编译：gcc -c main.c
+void print_message();
+void first();
+void second();
+
+int main(void) {
+    first();
+    second();
+    print_message();
+
+    return 0;
+}
+
+// 生成first: gcc -o first main.o -lwrap -lfirst_one -lsecond_one -ldl -L.
+// 生成second: gcc -o second main.o -lwrap -lsecond_one -lfirst_one -ldl -L.
+
+/* 运行结果
+./first                                                                                                                            
+load func first f=0x7f2d0ace76c0
+init first
+init second
+the wrap lib~~
+the first lib~~
+*/
+
+/* 运行结果
+./second                                                                                                                           
+load func first f=0x7f78d6e616c0
+init first
+init second
+the wrap lib~~
+the second lib~~
+*/
+
+/* 使用ldd查看动态库加载顺序
+ldd first                                                                                                                           linux-vdso.so.1 =&gt;  (0x00007fff871d2000)
+    libwrap.so =&gt; ./libwrap.so (0x00007f7fff87e000)
+    libfirst_one.so =&gt; ./libfirst_one.so (0x00007f7fff67c000)
+    libsecond_one.so =&gt; ./libsecond_one.so (0x00007f7fff47a000)
+    libdl.so.2 =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f7fff276000)
+    libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f7ffeeac000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007f7fffa80000)
+*/
+
+/* 使用ldd查看动态库加载顺序
+ldd second                                                                                                           
+    linux-vdso.so.1 =&gt;  (0x00007ffd9b5b8000)
+    libwrap.so =&gt; ./libwrap.so (0x00007efd7f764000)
+    libsecond_one.so =&gt; ./libsecond_one.so (0x00007efd7f562000)
+    libfirst_one.so =&gt; ./libfirst_one.so (0x00007efd7f360000)
+    libdl.so.2 =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007efd7f15c000)
+    libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007efd7ed92000)
+    /lib64/ld-linux-x86-64.so.2 (0x00007efd7f966000)
+*/
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/11/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Programming.html'>Programming</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15092858454511.html">
                 
                   <h1>GCC技巧</h1>
@@ -324,55 +483,6 @@ message(STATUS &quot;${Green}[ Welcome $ENV{USER} ]${ColorReset}&quot;)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15075636476028.html">
-                
-                  <h1>C中的内存对齐引发的问题</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我的第一反应是错位了。因为 256 正好是 0x100 。检查了一下源代码，没发现什么问题。在 src/dns.c 里发现了这么几行：</p>
-
-<pre><code class="language-c">y-&gt;type = ntohs(*(unsigned short *)(&amp;msg[i])); 
-i += 2; 
-y-&gt;class = ntohs(*(unsigned short *)(&amp;msg[i])); 
-i += 2;
-</code></pre>
-
-<p>脑子里一下闪现出初学 C 语言时某本书上提到的一句话：某些机器上，读取宽字需要地址对齐。</p>
-
-<p>也就是说，如果 &amp;msg[i] 的地址不对齐，从中读取一个 unsigned short 很可能是不可靠的（会强制对齐）。而网络包是紧凑排列，前面排的是域名字符串，不可能刚好在那个位置保证对齐。这也解释了为什么不同长度的域名查询，有的可以正确解析，有的不行。</p>
-
-<p>加了几行 log 验证了我的想法之后，我动手 fix 这个 bug 。非常简单，只需要先用 memcpy 把 &amp;msg[i] 后 sizeof(unsigned short) 个字节复制到一个局部 unsigned short 变量中，然后再调用 ntohs 即可。事实上，drnd 早期的版本正是这样做的，memcpy 的那几行还被注释在下面，不知道为何，后来改成了现在这样错误的版本。</p>
-
-<p>修改过后，一切正常了。</p>
-
-<p><strong>自己也遇到过此类问题，本文节选自云风博客</strong></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Programming.html'>Programming</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -448,6 +558,18 @@ i += 2;
 	      
 		      
 			      <li class="post">
+			        <a href="15427038173082.html">Linux下动态库函数的hook</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15265662090081.html">Debian on my x230</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15109047754746.html">Mac OSX中使用wireshark抓包遇到的权限问题</a>
 			      </li>
 		     
@@ -465,16 +587,8 @@ i += 2;
 		     
 		  
 		      
-			      <li class="post">
-			        <a href="15090804393896.html">Mac GDB (Unable to find Mach task port for process-id 1262: (os/kern) failure (0x5).) 问题</a>
-			      </li>
-		     
 		  
 		      
-			      <li class="post">
-			        <a href="15075637008733.html">C中的默认参数与命名参数</a>
-			      </li>
-		     
 		  
 		      
 		  

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Add Public SSH Key to Remote Server - slucx的博客
+  Debian on my x230 - slucx的博客
   
   </title>
   
@@ -105,10 +105,10 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Add Public SSH Key to Remote Server</h1>
+          <h1>Debian on my x230</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/10/9</span>
+          <span class="date">2018/5/17</span>
 
           <span>posted in&nbsp;</span> 
           
@@ -125,17 +125,16 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>If you want to setup SSH keys to allow logging in without a password, you can do so with a sigle commang.</p>
-
-<p>The first thing you&#39;ll need to do is make sure you&#39;ve run the keygen command to generate the keys:</p>
-
-<pre><code class="language-shell">ssh-keygen -t rsa
-</code></pre>
-
-<p>Then use this command to push the key to the remote server, modifying it to match your serer name.</p>
-
-<pre><code class="language-shell">cat ~/.ssh/id_rsa.pub | ssh user@hostname &#39;cat &gt;&gt; .ssh/authorized_keys&#39;
-</code></pre>
+      <ol>
+<li>install base system</li>
+<li>update and install aptitude</li>
+<li>aptitude install awesome lightdm rxvt-unicode emacs tmux</li>
+<li>aptitude install sudo zsh git build-essential</li>
+<li>install oh-my-zsh</li>
+<li>aptitude install feh gpicview thunar tango-icon-theme</li>
+<li>aptitude install firmware-iwlwifi; modprobe -r iwlwifi; modprobe iwlwifi</li>
+<li>aptitude install automake autoconf cmake</li>
+</ol>
 
 
     
@@ -146,16 +145,16 @@
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="15075630465300.html" 
-          title="Previous Post: set http proxy for git">&laquo; set http proxy for git</a>
+          <a href="15427038173082.html" 
+          title="Previous Post: Linux下动态库函数的hook">&laquo; Linux下动态库函数的hook</a>
       
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="15075630040132.html" 
-          title="Next Post: NetworkManager 接管网卡">NetworkManager 接管网卡 &raquo;</a>
+          <a  href="15109047754746.html" 
+          title="Next Post: Mac OSX中使用wireshark抓包遇到的权限问题">Mac OSX中使用wireshark抓包遇到的权限问题 &raquo;</a>
       
       </p>
         </div>

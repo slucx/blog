@@ -105,6 +105,55 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15075636476028.html">
+                
+                  <h1>C中的内存对齐引发的问题</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我的第一反应是错位了。因为 256 正好是 0x100 。检查了一下源代码，没发现什么问题。在 src/dns.c 里发现了这么几行：</p>
+
+<pre><code class="language-c">y-&gt;type = ntohs(*(unsigned short *)(&amp;msg[i])); 
+i += 2; 
+y-&gt;class = ntohs(*(unsigned short *)(&amp;msg[i])); 
+i += 2;
+</code></pre>
+
+<p>脑子里一下闪现出初学 C 语言时某本书上提到的一句话：某些机器上，读取宽字需要地址对齐。</p>
+
+<p>也就是说，如果 &amp;msg[i] 的地址不对齐，从中读取一个 unsigned short 很可能是不可靠的（会强制对齐）。而网络包是紧凑排列，前面排的是域名字符串，不可能刚好在那个位置保证对齐。这也解释了为什么不同长度的域名查询，有的可以正确解析，有的不行。</p>
+
+<p>加了几行 log 验证了我的想法之后，我动手 fix 这个 bug 。非常简单，只需要先用 memcpy 把 &amp;msg[i] 后 sizeof(unsigned short) 个字节复制到一个局部 unsigned short 变量中，然后再调用 ntohs 即可。事实上，drnd 早期的版本正是这样做的，memcpy 的那几行还被注释在下面，不知道为何，后来改成了现在这样错误的版本。</p>
+
+<p>修改过后，一切正常了。</p>
+
+<p><strong>自己也遇到过此类问题，本文节选自云风博客</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Programming.html'>Programming</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15075636194985.html">
                 
                   <h1>gcc扩展</h1>
@@ -358,6 +407,18 @@ int main() {
 	      
 		      
 			      <li class="post">
+			        <a href="15427038173082.html">Linux下动态库函数的hook</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15265662090081.html">Debian on my x230</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15109047754746.html">Mac OSX中使用wireshark抓包遇到的权限问题</a>
 			      </li>
 		     
@@ -375,16 +436,8 @@ int main() {
 		     
 		  
 		      
-			      <li class="post">
-			        <a href="15090804393896.html">Mac GDB (Unable to find Mach task port for process-id 1262: (os/kern) failure (0x5).) 问题</a>
-			      </li>
-		     
 		  
 		      
-			      <li class="post">
-			        <a href="15075637008733.html">C中的默认参数与命名参数</a>
-			      </li>
-		     
 		  
 		      
 		  
